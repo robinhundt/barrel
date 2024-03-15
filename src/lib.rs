@@ -25,6 +25,14 @@ impl Client {
         Ok(Self { write, read })
     }
 
+    pub fn get_size(&mut self) -> Result<Size, Error> {
+        let resp = self.send_recv(Msg::GetSize)?;
+        match resp {
+            Response::Size(size) => Ok(size),
+            _ => Err(Error::WrongResponse),
+        }
+    }
+
 
     /// Flushes the internal buffer after sending.
     pub fn send(&mut self, msg: Msg) -> Result<(), Error> {
@@ -121,6 +129,8 @@ pub enum Error {
     RgbaDecode(#[from] ParseIntError),
     #[error("The msg to sent expects no response. Use send.")]
     NoResponseExpected,
+    #[error("Server sent wrong response")]
+    WrongResponse,
     #[cfg(feature = "capture")]
     #[error("Unable to send screen capture")]
     ScreenCapture(#[from] screen_capture::Error),
